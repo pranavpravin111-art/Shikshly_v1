@@ -1,0 +1,1 @@
+{"expo":{"name":"Shikshly","slug":"shikshly-school-app","version":"1.0.0","orientation":"portrait","scheme":"shikshly","userInterfaceStyle":"light","plugins":["expo-router","expo-secure-store"],"experiments":{"typedRoutes":true},"android":{"package":"in.shikshly.app"},"ios":{"bundleIdentifier":"in.shikshly.app"}}}

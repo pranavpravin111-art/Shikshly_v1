@@ -1,0 +1,14 @@
+import { useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { api, saveToken } from '../../lib/api';
+export default function JoinInvite() { const { code = '' } = useLocalSearchParams(); const [name, setName] = useState(''); const [email, setEmail] = useState(''); const [password, setPassword] = useState(''); const [error, setError] = useState(''); const router = useRouter(); async function join() { setError(''); try {
+    const r = await api('/auth/join', { method: 'POST', body: JSON.stringify({ code, name, email, password }) });
+    await saveToken(r.token);
+    router.replace('/');
+}
+catch (e) {
+    setError(e.message);
+} } return <ScrollView contentContainerStyle={s.page}><Text style={s.brand}>Shikshly<Text style={{ color: '#668a78' }}>.</Text></Text><Text style={s.eyebrow}>YOUR SCHOOL INVITATION</Text><Text style={s.title}>A place for you, too.</Text><Text style={s.body}>Finish setting up your account to join your school.</Text><View style={s.card}><Text style={s.label}>Invite code</Text><Text style={s.code}>{code}</Text>{[['Your name', name, setName], ['Email address', email, setEmail], ['Choose a password', password, setPassword]].map(([label, value, set]) => <View key={label}><Text style={s.label}>{label}</Text><TextInput value={value} onChangeText={set} secureTextEntry={label === 'Choose a password'} autoCapitalize={label === 'Email address' ? 'none' : 'words'} style={s.input}/></View>)}{error ? <Text style={s.error}>{error}</Text> : null}<Pressable style={s.button} onPress={join}><Text style={s.buttonText}>Join your school →</Text></Pressable></View></ScrollView>; }
+;
+const s = StyleSheet.create({ page: { flexGrow: 1, backgroundColor: '#f6f8f4', padding: 25, paddingTop: 60 }, brand: { fontSize: 18, fontWeight: '700', color: '#172825' }, eyebrow: { fontSize: 10, letterSpacing: 1.5, color: '#668a78', fontWeight: '700', marginTop: 55 }, title: { fontSize: 35, fontWeight: '700', letterSpacing: -1, color: '#172825', marginTop: 10 }, body: { fontSize: 14, color: '#7a8780', lineHeight: 21, marginTop: 7 }, card: { backgroundColor: '#fff', borderColor: '#e2e9e2', borderWidth: 1, borderRadius: 20, padding: 19, marginTop: 26 }, label: { fontSize: 12, fontWeight: '700', color: '#172825', marginTop: 14, marginBottom: 7 }, code: { fontSize: 16, letterSpacing: 2, fontWeight: '800', color: '#668a78', backgroundColor: '#edf2ed', padding: 12, borderRadius: 10 }, input: { height: 46, borderWidth: 1, borderColor: '#e2e9e2', borderRadius: 11, paddingHorizontal: 12, color: '#172825' }, button: { height: 49, backgroundColor: '#172825', borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginTop: 20 }, buttonText: { color: '#fff', fontSize: 13, fontWeight: '700' }, error: { color: '#a94635', fontSize: 12, marginTop: 12 } });

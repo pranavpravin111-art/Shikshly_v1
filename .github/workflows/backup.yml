@@ -1,0 +1,21 @@
+# Weekly encrypted database backup, kept 30 days in GitHub (free). Download from the Actions tab > the run > Artifacts.
+# One-time setup: GitHub > Settings > Secrets and variables > Actions > add MONGO_URI and BACKUP_PASSPHRASE
+# (keep the passphrase somewhere safe: without it the backup cannot be opened).
+name: Weekly backup
+on:
+  schedule: [{ cron: '30 21 * * 0' }]   # Sunday 03:00 IST
+  workflow_dispatch:
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: node apps/api/scripts/backup.js
+        env:
+          MONGO_URI: ${{ secrets.MONGO_URI }}
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+      - uses: actions/upload-artifact@v4
+        with: { name: shikshly-backup, path: apps/api/backups/*.bak, retention-days: 30 }

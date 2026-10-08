@@ -1,0 +1,18 @@
+name: CI
+on: [push, pull_request]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      # A real MongoDB replica set, so fee/admission transactions are tested for real.
+      - uses: supercharge/mongodb-github-action@1.11.0
+        with: { mongodb-version: '7.0', mongodb-replica-set: rs0 }
+      - run: npm ci
+      - run: node scripts/setup.js
+      # Same single command a developer runs locally: unit tests + website build + API + ~100 end-to-end checks.
+      - run: npm run verify
+      - name: API Docker image builds
+        run: docker build -f apps/api/Dockerfile -t shikshly-api .

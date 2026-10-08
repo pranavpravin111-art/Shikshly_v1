@@ -1,0 +1,36 @@
+# One-click deploy on https://render.com : New > Blueprint > pick this repository.
+# You still need (1) a MongoDB Atlas database, (2) a Resend API key. Details: docs/DEPLOY.md
+services:
+  - type: web
+    name: shikshly-api
+    runtime: docker
+    dockerfilePath: ./apps/api/Dockerfile
+    dockerContext: .
+    healthCheckPath: /ready
+    autoDeploy: true
+    envVars:
+      - { key: NODE_ENV, value: production }
+      - { key: TRUST_PROXY, value: "true" }
+      - { key: JWT_SECRET, generateValue: true }
+      - { key: PLATFORM_ADMIN_BOOTSTRAP_SECRET, generateValue: true }
+      - { key: MONGO_URI, sync: false }          # Atlas connection string
+      - { key: CORS_ORIGINS, sync: false }       # https://<your website address>
+      - { key: APP_WEB_URL, sync: false }        # https://<your website address>
+      - { key: ALERT_WEBHOOK_URL, sync: false }  # Slack/Discord webhook: error alerts to your phone
+      - { key: MAIL_PROVIDER, value: resend }
+      - { key: RESEND_API_KEY, sync: false }
+      - { key: MAIL_FROM, sync: false }
+      - { key: RAZORPAY_KEY_ID, sync: false }
+      - { key: RAZORPAY_KEY_SECRET, sync: false }
+      - { key: RAZORPAY_WEBHOOK_SECRET, sync: false }
+      - { key: MSG91_AUTH_KEY, sync: false }
+      - { key: MSG91_ATTENDANCE_TEMPLATE_ID, sync: false }
+  - type: web
+    name: shikshly-web
+    runtime: static
+    buildCommand: npm ci && npm run build -w apps/web
+    staticPublishPath: apps/web/dist
+    envVars:
+      - { key: VITE_API_URL, sync: false }       # https://<api address>/api
+    routes:
+      - { type: rewrite, source: /*, destination: /index.html }
